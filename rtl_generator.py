@@ -15,14 +15,20 @@ def generate_rtl(config):
         template = env.get_template("sram.v.j2")
 
     # Render template
-    return template.render(
-    width=width,
-    depth=depth,
-    addr_width=addr_width,
-    low_power=config["low_power"],
-    protocol=config["protocol"],
-    mode=config.get("mode", "NORMAL")
-)
+    code = template.render(
+        width=width,
+        depth=depth,
+        addr_width=addr_width,
+        low_power=config["low_power"],
+        protocol=config["protocol"],
+        mode=config.get("mode", "NORMAL")
+    )
+
+    # ✅ SAVE RTL HERE (IMPORTANT)
+    save_rtl(code)
+
+    return code
+
 
 def save_rtl(code):
     with open("controller.v", "w") as f:
