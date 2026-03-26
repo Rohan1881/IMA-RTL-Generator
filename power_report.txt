@@ -1,6 +1,0 @@
-===== POWER REPORT =====
-Width: 256 bits
-Depth: 256
-Low Power Mode: True
-Switching Activity: REDUCED
-Estimated Power Saving: ~20%
