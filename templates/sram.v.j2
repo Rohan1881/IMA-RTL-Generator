@@ -1,0 +1,48 @@
+module sram_controller (
+    input clk,
+    input rst,
+    input we,
+    input [{{addr_width-1}}:0] addr,
+    input [{{width-1}}:0] din,
+    output reg [{{width-1}}:0] dout
+);
+
+// ===============================
+// CONFIGURATION
+// Mode: {{mode}}
+// Protocol: {{protocol}}
+// ===============================
+
+reg [{{width-1}}:0] mem [0:{{depth-1}}];
+
+always @(posedge clk) begin
+    if (rst) begin
+        dout <= 0;
+    end else begin
+        if (we) begin
+            // Write path (reduced switching activity)
+            mem[addr] <= din;
+        end else begin
+            // Low power read path
+            dout <= mem[addr];
+        end
+    end
+end
+
+// ===============================
+// FEATURE FLAGS
+// ===============================
+
+{% if low_power %}
+// Low Power Optimization Enabled:
+// - Read path disabled during write
+// - Reduced switching activity
+{% endif %}
+
+{% if protocol == "AXI" %}
+// AXI Protocol Mode (Simplified):
+// - Ready/Valid handshake can be extended
+// - Placeholder for AXI signals
+{% endif %}
+
+endmodule

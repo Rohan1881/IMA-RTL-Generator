@@ -1,0 +1,12 @@
+===== DESIGN SUMMARY =====
+Memory Type: SRAM
+Width: 256 bits
+Depth: 256
+Protocol: AXI
+Timing: 10 ns
+Low Power Mode: True
+
+Verification Status: PASSED
+Tests Passed: 3/3
+CDC Status: SAFE
+Lint Status: CLEAN

@@ -1,0 +1,4 @@
+===== CDC REPORT =====
+Clock Domains: 1
+CDC Violations: 0
+Status: SAFE

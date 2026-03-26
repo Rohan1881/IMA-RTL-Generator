@@ -1,0 +1,27 @@
+module dram_controller (
+    input clk,
+    input rst,
+    input we,
+    input [{{addr_width-1}}:0] addr,
+    input [{{width-1}}:0] din,
+    output reg [{{width-1}}:0] dout
+);
+
+reg [{{width-1}}:0] mem [0:{{depth-1}}];
+reg [{{width-1}}:0] temp;
+
+always @(posedge clk) begin
+    if (rst) begin
+        dout <= 0;
+    end else begin
+        if (we) begin
+            mem[addr] <= din;
+        end else begin
+            // DRAM latency + low power
+            temp <= mem[addr];
+            dout <= temp;
+        end
+    end
+end
+
+endmodule
