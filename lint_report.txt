@@ -1,5 +1,0 @@
-===== LINT REPORT =====
-Syntax Check: PASS
-Warnings: 0
-Unused Signals: NONE
-Status: CLEAN
