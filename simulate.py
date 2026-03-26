@@ -1,34 +1,43 @@
-import subprocess   # ✅ THIS LINE WAS MISSING
+import os
 
 def run_simulation():
-    print("\nRunning Simulation...\n")
+    print("Running Simulation...")
 
-    try:
-        iverilog_path = r"C:\iverilog\bin\iverilog.exe"
-        vvp_path = r"C:\iverilog\bin\vvp.exe"
+    # Compile
+    compile_status = os.system("iverilog -o sim.out controller.v testbench.v")
 
-        # Compile
-        compile_process = subprocess.run(
-            [iverilog_path, "-o", "sim.out", "controller.v", "testbench.v"],
-            capture_output=True,
-            text=True
-        )
+    if compile_status != 0:
+        print(" Compilation Failed")
+        return
 
-        if compile_process.returncode != 0:
-            print("❌ Compilation Error:\n")
-            print(compile_process.stderr)
-            return
+    # Run
+    run_status = os.system("vvp sim.out > output.log")
 
-        # Run
-        run_process = subprocess.run(
-            [vvp_path, "sim.out"],
-            capture_output=True,
-            text=True
-        )
+    if run_status != 0:
+        print(" Simulation Failed")
+        return
 
-        print(run_process.stdout)
+    # Read output
+    with open("output.log", "r", encoding="utf-8") as f:
+        output = f.read()
 
-        print("✔ Simulation Completed")
+    results = {
+        "TEST1": "FAIL",
+        "TEST2": "FAIL",
+        "TEST3": "FAIL"
+    }
 
-    except Exception as e:
-        print("❌ Error:", e)
+    for key in results:
+        if f"{key} PASS" in output:
+            results[key] = "PASS"
+
+    print("--------------------------------")
+    for k, v in results.items():
+        print(f"{k} {v}")
+
+    if all(v == "PASS" for v in results.values()):
+        print("ALL TESTS PASSED")
+    else:
+        print(" SOME TESTS FAILED")
+
+    print("--------------------------------")

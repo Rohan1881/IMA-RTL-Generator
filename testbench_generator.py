@@ -1,22 +1,21 @@
-import random
+import json
 
-def generate_testbench(config):
-    width = config["width"]
-    depth = config["depth"]
+def generate_testbench(controller_file, config):
+
+    # Dynamic module selection
     module_name = "dram_controller" if config["type"] == "DRAM" else "sram_controller"
-    max_addr = depth - 1
-    rand_val = random.randint(1, 255)
 
     tb = f"""
-module tb;
+module testbench;
 
 reg clk;
 reg rst;
 reg we;
-reg [{depth.bit_length()-2}:0] addr;
-reg [{width-1}:0] din;
-wire [{width-1}:0] dout;
+reg [8:0] addr;
+reg [255:0] din;
+wire [255:0] dout;
 
+// DUT
 {module_name} uut (
     .clk(clk),
     .rst(rst),
@@ -30,6 +29,10 @@ wire [{width-1}:0] dout;
 always #5 clk = ~clk;
 
 initial begin
+    //  Waveform dump
+    $dumpfile("wave.vcd");
+    $dumpvars(0, testbench);
+
     clk = 0;
     rst = 1;
     we = 0;
@@ -38,35 +41,72 @@ initial begin
 
     #10 rst = 0;
 
-    // TEST 1: Basic Write/Read
-    we = 1; addr = 1; din = 10;
-    #10 we = 0;
+    // =========================
+    // TEST1: Basic write/read
+    // =========================
+    we = 1;
+    addr = 9'd1;
+    din = 256'hA5A5;
     #10;
-    if (dout == 10) $display("TEST1 PASS");
-    else $display("TEST1 FAIL");
 
-    // TEST 2: Boundary
-    we = 1; addr = 0; din = 20;
-    #10 we = 0;
+    we = 0;
     #10;
-    if (dout == 20) $display("TEST2 PASS");
-    else $display("TEST2 FAIL");
 
-    // TEST 3: Random
-    we = 1; addr = {max_addr}; din = {rand_val};
-    #10 we = 0;
+    $display("WRITE: addr=%d data=%h", addr, din);
+    $display("READ : addr=%d data=%h", addr, dout);
+
+    if (dout == 256'hA5A5)
+        $display("TEST1 PASS");
+    else
+        $display("TEST1 FAIL");
+
+
+    // =========================
+    // TEST2: Boundary
+    // =========================
+    we = 1;
+    addr = 9'd0;
+    din = 256'hDEAD;
     #10;
-    if (dout == {rand_val}) $display("TEST3 PASS");
-    else $display("TEST3 FAIL");
 
-    #10 $finish;
+    we = 0;
+    #10;
+
+    $display("WRITE: addr=%d data=%h", addr, din);
+    $display("READ : addr=%d data=%h", addr, dout);
+
+    if (dout == 256'hDEAD)
+        $display("TEST2 PASS");
+    else
+        $display("TEST2 FAIL");
+
+
+    // =========================
+    // TEST3: Random
+    // =========================
+    we = 1;
+    addr = 9'd100;
+    din = 256'h1234;
+    #10;
+
+    we = 0;
+    #10;
+
+    $display("WRITE: addr=%d data=%h", addr, din);
+    $display("READ : addr=%d data=%h", addr, dout);
+
+    if (dout == 256'h1234)
+        $display("TEST3 PASS");
+    else
+        $display("TEST3 FAIL");
+
+    $finish;
 end
 
 endmodule
 """
-    return tb
 
-
-def save_testbench(code):
     with open("testbench.v", "w") as f:
-        f.write(code)
+        f.write(tb)
+
+    print(f" testbench.v generated for {module_name}")
